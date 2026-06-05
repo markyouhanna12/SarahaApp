@@ -85,9 +85,9 @@ export const findOneAndUpdate = async({model,filter = {},data,options={new:true,
 
 }
 
-export const findByIdAndUpdate = async({model,id,data,options={new:true,runValidators:true}}) =>{
+export const findByIdAndUpdate = async({model,id,update,options={new:true,runValidators:true}}) =>{
 
-    return await model.findByIdAndUpdate(id,{...data,$inc:{__v:1}},options)
+    return await model.findByIdAndUpdate(id,{...update,$inc:{__v:1}},options)
 
 }
 
