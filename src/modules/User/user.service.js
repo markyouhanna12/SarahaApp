@@ -24,3 +24,18 @@ export const updateProfilePic = async (req,res) => {
         data:user})
 
 }
+
+
+export const updateCoverPic= async (req,res) => {
+
+    const user = await findByIdAndUpdate({
+        model:User , 
+        id:req.user._id ,
+         update:{coverImages : req.files?.map(file => file.finalPath)}})
+
+    return successResponse(
+        {res,message:"Done",
+        statusCode:200,
+        data:user})
+
+}

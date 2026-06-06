@@ -55,6 +55,9 @@ const userSchema = new mongoose.Schema({
     profilePic:{
         type:String
     },
+    coverImages:{
+        type:[String]
+    },
     age:{
         type:Number,
         minLength:18,

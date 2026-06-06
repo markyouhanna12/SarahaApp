@@ -16,8 +16,16 @@ router.get("/",
 router.patch("/update-profile-pic",
     authentication({tokenType:TokenTypeEnum.Access}),
     authorization({accessRoles:[RoleEnum.User]}),
-    localFileUpload({customPath:"User" , validation:fileValidation.images}).single("attachments"),
+    localFileUpload({customPath:"User" , validation:[...fileValidation.images]}).single("attachments"),
     userService.updateProfilePic)
+
+
+router.patch("/update-profile-Cover",
+    authentication({tokenType:TokenTypeEnum.Access}),
+    authorization({accessRoles:[RoleEnum.User]}),
+    localFileUpload({customPath:"User" , validation:[...fileValidation.images]}).array("attachments",5),
+    userService.updateCoverPic)
+  
 
 
 export default router
