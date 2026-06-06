@@ -2,7 +2,17 @@ import multer from "multer"
 import path from "path"
 import fs from "node:fs"
 
-export const localFileUpload = ({customPath = "general"}) => {
+export const fileValidation = {
+    images:["image/jpeg","image/png","image/gif","image/webp"],
+    pdf:["application/pdf"],
+    excel:["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","application/vnd.ms-excel"],
+    documents:["application/msword","application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+    videos:["video/mp4","video/mpeg","video/quicktime"],
+    audio:["audio/mpeg","audio/wav","audio/ogg"]
+}
+
+
+export const localFileUpload = ({customPath = "general" , validation}) => {
 
     const basePath = `uploads/${customPath}`
 
@@ -25,8 +35,17 @@ export const localFileUpload = ({customPath = "general"}) => {
         }
 
     })
+
+    const fileFilter = (req,file,cb) => {
+        if(validation && !validation.includes(file.mimetype)){
+            console.log("file type not allowed", file.mimetype)
+            return cb(new Error("Invalid file type"),false)
+        }else{
+            cb(null,true)
+        }
+    }
         
-    return multer({storage}) // middleware
+    return multer({fileFilter:fileFilter,storage:storage})
 }
 
 // example Path

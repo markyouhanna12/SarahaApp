@@ -19,4 +19,10 @@ const startServer = async () =>{
 
 startServer()
 
+// 1611
+// 2001
+// 1234
+// 0000
+// 1979
+// 1977
 

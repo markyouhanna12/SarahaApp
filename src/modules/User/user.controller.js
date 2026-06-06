@@ -2,7 +2,7 @@ import express from "express";
 import * as userService from "./user.service.js";
 import { authentication, authorization } from "../../middlewares/Auth.middleware.js";
 import { RoleEnum, TokenTypeEnum } from "../../utils/enums/user.enum.js";
-import { localFileUpload } from "../../utils/multer/local.multer.js";
+import { fileValidation, localFileUpload } from "../../utils/multer/local.multer.js";
 
 const router = express.Router()
 
@@ -16,7 +16,7 @@ router.get("/",
 router.patch("/update-profile-pic",
     authentication({tokenType:TokenTypeEnum.Access}),
     authorization({accessRoles:[RoleEnum.User]}),
-    localFileUpload({customPath:"User"}).single("attachments"),
+    localFileUpload({customPath:"User" , validation:fileValidation.images}).single("attachments"),
     userService.updateProfilePic)
 
 

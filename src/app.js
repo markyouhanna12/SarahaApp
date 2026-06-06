@@ -11,7 +11,7 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 await connectDB()
-app.use("/uploads",express.static("src/uploads"))
+app.use("/uploads",express.static("./src/uploads"))
 app.use("/auth",authRouter)
 app.use("/user",userRouter)
 
