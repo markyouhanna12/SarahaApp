@@ -79,6 +79,18 @@ export const generalFields = {
         gender: joi.string().valid(... Object.values(GenderEnum)),
         role: joi.string().valid(... Object.values(RoleEnum)),
         provider: joi.string().valid(... Object.values(ProviderEnum)),
+
+        file:{
+            fieldname : joi.string(),
+            originalname : joi.string(),
+            encoding : joi.string(),
+            mimetype : joi.string(),
+            destination : joi.string(),
+            filename : joi.string(),
+            path : joi.string(),
+            size : joi.number(),
+            finalPath : joi.string()
+        }
     
 }
 
