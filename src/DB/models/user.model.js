@@ -62,6 +62,9 @@ const userSchema = new mongoose.Schema({
         type:Number,
         minLength:18,
         maxLength:50
+    },
+    changeCredentialsTime:{
+        type:Date
     }
 
 

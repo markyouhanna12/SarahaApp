@@ -1,5 +1,5 @@
 import User from "../../DB/models/user.model.js"
-import {create, findOne, findById} from "../../DB/database.repository.js"
+import {create, findOne, findById, updateOne, findByIdAndUpdate} from "../../DB/database.repository.js"
 import {BadRequestException, ConflictException, NotFoundException} from "../../utils/response/error.response.js"
 import {successResponse} from "../../utils/response/success.resonse.js"
 import {genrateHash,compareHash} from "../../utils/security/hash.security.js"
@@ -15,9 +15,10 @@ import {ACCESS_EXPIRES,
     Client_ID} from "../../../config/config.service.js"
 
 import {OAuth2Client} from "google-auth-library"
-import { GenderEnum, ProviderEnum } from "../../utils/enums/user.enum.js"
+import { GenderEnum, LogoutTypeEnum, ProviderEnum } from "../../utils/enums/user.enum.js"
 
 import { signupSchema } from "./auth.validation.js"
+import TokenModel from "../../DB/models/token.model.js"
 
 
 
@@ -154,5 +155,34 @@ export const loginWithGoogle = async (req,res) =>{
     message: "Login successfully",
     data: credentials,
   });
+
+}
+
+export const logout = async (req,res) =>{
+
+    const {flag} = req.body
+    // flag ==> // signoutFromAll ,  onlyOneDevice
+
+    let status = 200
+    switch (flag){
+        case LogoutTypeEnum.logout:
+            await create({model:TokenModel, 
+                data:[
+                {
+                    jti: req.decoded.jti,
+                    userId: req.user._id,
+                    expiresIn:Date.now() - req.decoded.exp,
+                }
+            ]})
+            status = 201;
+        case LogoutTypeEnum.logoutFromAll:
+            await findByIdAndUpdate({model:User, id:{_id:req.user._id}, update:{changeCredentialsTime:Date.now()}})
+            status = 200
+    }
+
+    return successResponse({
+        res, message:"Logout Successfully",
+        statusCode: status
+    })
 
 }

@@ -6,6 +6,7 @@ import { ACCESS_EXPIRES,
     TOKEN_REFRESH_ADMIN_SECRET_KEY,
     TOKEN_REFRESH_USER_SECRET_KEY } from "../../../config/config.service.js"
 import { RoleEnum, SignatureEnum } from "../enums/user.enum.js"
+import { v4 as uuidv4 } from "uuid";
 
 
 export const genrateToken =  ({ payload , secretKey ,options = {expiresIn:ACCESS_EXPIRES} }) =>{
@@ -49,17 +50,18 @@ export const getNewLoginCredentials = async (user) =>{
     const signature = await getSignature({signatureLevel: 
         user.role != RoleEnum.Admin ? SignatureEnum.User : SignatureEnum.Admin})
     
+    const jwtid = uuidv4()
     
     const accessToken = genrateToken({
         payload:{id : user._id},
         secretKey: signature.accessSignature,
-        options:{expiresIn:ACCESS_EXPIRES}
+        options:{expiresIn:ACCESS_EXPIRES ,jwtid }
     })
 
     const refreshToken = genrateToken({
         payload:{id : user._id},
         secretKey: signature.refreshSignature,
-        options:{expiresIn:REFRESH_EXPIRES}
+        options:{expiresIn:REFRESH_EXPIRES , jwtid }
     })
     return {accessToken , refreshToken}
 }

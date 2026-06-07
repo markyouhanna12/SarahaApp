@@ -11,7 +11,7 @@ const router = express.Router()
 
 router.get("/",
     authentication({tokenType:TokenTypeEnum.Access}),
-    authorization({accessRoles:[RoleEnum.Admin]}),
+    authorization({accessRoles:[RoleEnum.User]}),
     userService.getProfile)
 
     

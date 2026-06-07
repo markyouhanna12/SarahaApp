@@ -1,7 +1,8 @@
-import { findById } from "../DB/database.repository.js";
+import { findById, findOne } from "../DB/database.repository.js";
+import TokenModel from "../DB/models/token.model.js";
 import User from "../DB/models/user.model.js";
 import { SignatureEnum, TokenTypeEnum } from "../utils/enums/user.enum.js";
-import { BadRequestException, ForbiddenException, NotFoundException } from "../utils/response/error.response.js";
+import { BadRequestException, ForbiddenException, NotFoundException , unauthorizedException } from "../utils/response/error.response.js";
 import { getSignature, verifyToken } from "../utils/tokens/token.js";
 
 export const decodedToken = async ({authorization , tokenType = TokenTypeEnum.Access}) =>{
@@ -22,12 +23,22 @@ export const decodedToken = async ({authorization , tokenType = TokenTypeEnum.Ac
         ? signature.accessSignature
         : signature.refreshSignature})
     
-    
+    // check if the token is rovked or not --> check the logout from current device
+    if(await findOne({model:TokenModel, filter:{jti:decoded.jti}})){
+        throw unauthorizedException({message:"Token is revoked"})
+    }
+
     const user = await findById({model:User, id:decoded.id})
 
     if(!user){
-        throw NotFoundException({Message:"Not Registered Account"})
+        throw NotFoundException({message:"Not Registered Account"})
     }
+
+    if(user.changeCredentialsTime?.getTime() > decoded.iat * 1000){
+        throw unauthorizedException({message:"Token is expired"})
+    }
+        
+
 
     return {user , decoded}
 

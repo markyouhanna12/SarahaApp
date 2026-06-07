@@ -74,14 +74,14 @@ export const insertMany = async({model,data}) =>{
     return await model.insertMany(data)
 }
 
-export const updateOne = async({model,filter = {},data,options={}}) =>{
+export const updateOne = async({model,filter = {},update,options={}}) =>{
     return await model.UpdateOne(filter
-        ,{...data,$inc:{__v:1}}
+        ,{...update,$inc:{__v:1}}
         ,options)
 }
 
-export const findOneAndUpdate = async({model,filter = {},data,options={new:true,runValidators:true}}) => {
-    return await model.findOneAndUpdate(filter,{...data,$inc:{__v:1}},options)
+export const findOneAndUpdate = async({model,filter = {},update,options={new:true,runValidators:true}}) => {
+    return await model.findOneAndUpdate(filter,{...update,$inc:{__v:1}},options)
 
 }
 
