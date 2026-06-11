@@ -5,12 +5,14 @@ import { successResponse } from "./utils/response/success.resonse.js"
 import { globalErrorHandler, NotFoundException } from "./utils/response/error.response.js"
 import connectDB from "./DB/connection.js"
 import cors from "cors"
+import { connectRedis } from "./DB/redis.connection.js"
 
 const app = express()
 
 app.use(express.json())
 app.use(cors())
 await connectDB()
+await connectRedis()
 app.use("/uploads",express.static("./src/uploads"))
 app.use("/auth",authRouter)
 app.use("/user",userRouter)
