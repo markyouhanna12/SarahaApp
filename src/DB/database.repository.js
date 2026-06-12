@@ -75,7 +75,7 @@ export const insertMany = async({model,data}) =>{
 }
 
 export const updateOne = async({model,filter = {},update,options={}}) =>{
-    return await model.UpdateOne(filter
+    return await model.updateOne(filter
         ,{...update,$inc:{__v:1}}
         ,options)
 }

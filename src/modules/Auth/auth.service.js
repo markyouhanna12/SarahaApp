@@ -65,10 +65,52 @@ export const signup = async (req, res) => {
 
 }
 
+export const confirmEmail = async (req,res) =>{
+    const {email ,otp} =req.body
+    const user = await findOne({
+        model:User,
+        filter:{
+            confirmEmail: {$exists:false},
+            cofirmEmailOTP: {$exists:true}
+
+        }
+    })
+    if(!user){
+        throw NotFoundException({message:"User not found"})
+    }
+
+    const isOtpValid = await compareHash({
+        plaintext:otp,
+        ciphertext:user.cofirmEmailOTP,
+        algorithm:HashEnum.Argon
+    })
+
+    if(!isOtpValid){
+        throw BadRequestException({message:"Invalid otp"})
+    }
+
+    await updateOne({
+        model:User,
+        filter:{email},
+        update:{confirmEmail:Date.now(), $unset: {cofirmEmailOTP :true}}
+    })
+
+    return successResponse({
+        res,
+        statusCode:200,
+        message:"Email confirmed successfully"
+    })
+
+
+
+}
+
 
 export const login = async (req, res) => {
     const {email ,password} = req.body
-    const user = await findOne({model:User, filter:{email}})
+    const user = await findOne({
+        model:User, 
+        filter:{email , confirmEmail:{$exists : true}}})
 
     if(!user){
         throw NotFoundException({message:"Invalid email or password"})

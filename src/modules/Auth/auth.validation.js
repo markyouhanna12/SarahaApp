@@ -34,3 +34,16 @@ export const loginSchema = {
 })
 
 }
+
+
+
+export const confirmEmailSchema = {
+    body: joi.object({
+
+    email : generalFields.email.required(),
+
+    otp : generalFields.otp.required()
+
+})
+
+}

@@ -90,7 +90,8 @@ export const generalFields = {
             path : joi.string(),
             size : joi.number(),
             finalPath : joi.string()
-        }
+        },
+        otp: joi.string().pattern(/^[0-9]{6}$/)
     
 }
 
