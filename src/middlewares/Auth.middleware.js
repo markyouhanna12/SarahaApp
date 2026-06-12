@@ -13,7 +13,7 @@ export const decodedToken = async ({authorization , tokenType = TokenTypeEnum.Ac
     // User --> 1
 
     if(!Bearer || !token){
-        throw BadRequestException({Message:"Invalid Token"})
+        throw BadRequestException({message:"Invalid Token"})
     }
 
     const signature = await getSignature({signatureLevel:SignatureEnum[Bearer]})
