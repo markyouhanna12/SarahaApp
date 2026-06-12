@@ -20,7 +20,8 @@ import { GenderEnum, LogoutTypeEnum, ProviderEnum } from "../../utils/enums/user
 import { signupSchema } from "./auth.validation.js"
 import TokenModel from "../../DB/models/token.model.js"
 import { revokeAllTokenKey, revokeTokenKey, set } from "../../DB/redis.repository.js"
-
+import { generateOTP } from "../../utils/generateOTP.js"
+import { emailSubject, sendEmail } from "../../utils/email/email.utils.js"
 
 
 export const signup = async (req, res) => {
@@ -38,10 +39,22 @@ export const signup = async (req, res) => {
     const hashedPassword = await genrateHash({plaintext:password,algorithm:HashEnum.Argon})
 
     const encryptedData = await encrypt(phone)
+    
+    const otp = generateOTP()
+
+    const hashedOtp = await genrateHash({plaintext:otp,algorithm:HashEnum.Argon})
 
 
     const newUser = await create({model:User,
-        data:[{firstName, lastName, email, password:hashedPassword , phone:encryptedData}]})
+        data:[{
+            firstName, 
+            lastName,
+            email, 
+            password:hashedPassword ,
+            phone:encryptedData ,
+            cofirmEmailOTP :hashedOtp }]})
+
+    await sendEmail({to:email , subject:emailSubject.confirmEmial , text : otp})
 
     return successResponse({res,statusCode:201,message:"User Created successfully",data:{newUser}})
 

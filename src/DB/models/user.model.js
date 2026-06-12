@@ -52,6 +52,9 @@ const userSchema = new mongoose.Schema({
     confirmEmail:{
         type:Date
     },
+    cofirmEmailOTP:{
+        type:String
+    },
     profilePic:{
         type:String
     },
