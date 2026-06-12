@@ -60,6 +60,15 @@ export const ForbiddenException = (
 
 
 
+export const TooManyRequestsException = (
+    message= "TooManyRequestsException" , extra = undefined)=>{
+
+        return ErrorResponse({message,status:429,extra})
+
+}
+
+
+
 
 export const globalErrorHandler = (error,req,res,next) =>{
     const status = error.status ?? 500;

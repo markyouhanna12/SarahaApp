@@ -11,19 +11,34 @@ export const revokeAllTokenKey = ({userId}) => {
     return `revokeAll:${userId}`;
 }
 
+export const otpKey = ({email}) => {
+    return `otp:${email}`;
+}
+
+export const otpAttemptsKey = ({email}) => {
+    return `otpAttempts:${email}`;
+}
+
+// increment a numeric key (returns the value after incrementing)
+export const incr = async ({key}) =>{
+    try {
+        return await redisClient.incr(key)
+    } catch (error) {
+        console.log("Redis Incr Error",error);
+    }
+}
 
 export const set = async ({key, value , ttl = null}) =>{
     try {
         const data = typeof value != "string" ? JSON.stringify(value) :value
 
         if(ttl){
-            
-        return await redisClient.set(key,value,ttl,
+        return await redisClient.set(key,data,
             {
                 expiration:{type:"EX",value:ttl}
         })
         } else {
-        return await redisClient.set(key,value)
+        return await redisClient.set(key,data)
     }
            
     } catch (error) {
@@ -69,12 +84,12 @@ export const update = async ({key, value , ttl = null}) =>{
         const data = typeof value != "string" ? JSON.stringify(value) :value
 
         if(ttl){
-            return await redisClient.set(key,value,ttl,
+            return await redisClient.set(key,data,
                 {
                     expiration:{type:"EX",value:ttl}
             })
         }
-            return await redisClient.set(key,value)
+            return await redisClient.set(key,data)
 
     } catch (error) {
         console.log("Redis Update Error",error);

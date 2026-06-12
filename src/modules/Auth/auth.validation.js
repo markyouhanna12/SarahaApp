@@ -47,3 +47,14 @@ export const confirmEmailSchema = {
 })
 
 }
+
+
+
+export const sendOtpSchema = {
+    body: joi.object({
+
+    email : generalFields.email.required()
+
+})
+
+}

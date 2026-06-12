@@ -1,6 +1,6 @@
 import User from "../../DB/models/user.model.js"
 import {create, findOne, findById, updateOne, findByIdAndUpdate} from "../../DB/database.repository.js"
-import {BadRequestException, ConflictException, NotFoundException} from "../../utils/response/error.response.js"
+import {BadRequestException, ConflictException, NotFoundException, TooManyRequestsException} from "../../utils/response/error.response.js"
 import {successResponse} from "../../utils/response/success.resonse.js"
 import {genrateHash,compareHash} from "../../utils/security/hash.security.js"
 import { HashEnum } from "../../utils/enums/security.enum.js"
@@ -12,14 +12,17 @@ import {ACCESS_EXPIRES,
     TOKEN_REFRESH_USER_SECRET_KEY,
     TOKEN_ACCESS_ADMIN_SECRET_KEY,
     TOKEN_ACCESS_USER_SECRET_KEY,
-    Client_ID} from "../../../config/config.service.js"
+    Client_ID,
+    OTP_TTL,
+    MAX_OTP_TRIALS,
+    OTP_WINDOW} from "../../../config/config.service.js"
 
 import {OAuth2Client} from "google-auth-library"
 import { GenderEnum, LogoutTypeEnum, ProviderEnum } from "../../utils/enums/user.enum.js"
 
 import { signupSchema } from "./auth.validation.js"
 import TokenModel from "../../DB/models/token.model.js"
-import { revokeAllTokenKey, revokeTokenKey, set } from "../../DB/redis.repository.js"
+import { otpKey, otpAttemptsKey, revokeAllTokenKey, revokeTokenKey, set, get, incr, expire, ttl, del } from "../../DB/redis.repository.js"
 import { generateOTP } from "../../utils/generateOTP.js"
 import { emailSubject, sendEmail } from "../../utils/email/email.utils.js"
 import { emailEvent } from "../../utils/events/email.events.js"
@@ -286,4 +289,57 @@ export const logoutWithRedis = async (req,res) =>{
         statusCode: status
     })
 
+}
+
+export const resendOTP = async (req,res) =>{
+    const {email} = req.body
+
+
+    const user = await findOne({
+        model:User,
+        filter:{email , confirmEmail:{$exists:false}}
+    })
+    if(!user){
+        throw NotFoundException({message:"User not found or already confirmed"})
+    }
+
+    // if a valid (non-expired) OTP already exists, ask the user to wait
+    const existingOtp = await get({key:otpKey({email})})
+    if(existingOtp){
+        const remaining = await ttl(otpKey({email}))
+        // remaining > 0 -> still valid; (-1 = no expiry, -2 = no key) -> clean up and allow a new one
+        if(remaining > 0){
+            throw TooManyRequestsException({message:`An OTP was already sent. Please wait ${remaining}s before requesting a new one.`})
+        }
+        await del(otpKey({email}))
+    }
+
+    // enforce a maximum number of OTP requests per window
+    const trials = await incr({key:otpAttemptsKey({email})})
+    if(trials === 1){
+        // first request in this window: start the expiry window for the counter
+        await expire({key:otpAttemptsKey({email}), ttl:OTP_WINDOW})
+    }
+    if(trials > MAX_OTP_TRIALS){
+        throw TooManyRequestsException({message:"Maximum OTP requests reached. Please try again later."})
+    }
+
+    const otp = generateOTP()
+    const hashedOtp = await genrateHash({plaintext:otp, algorithm:HashEnum.Argon})
+
+    // store the hashed OTP in redis with a 1 minute expiry
+    await set({key:otpKey({email}), value:hashedOtp, ttl:OTP_TTL})
+
+    // keep the DB in sync so confirmEmail can validate the latest OTP
+    await updateOne({
+        model:User,
+        filter:{email},
+        update:{cofirmEmailOTP:hashedOtp}
+    })
+
+    emailEvent.emit("confirmEmail", {to:email , otp , firstName:user.firstName})
+
+    return successResponse({
+        res, message:"OTP sent successfully"
+    })
 }
