@@ -19,6 +19,7 @@ import { GenderEnum, LogoutTypeEnum, ProviderEnum } from "../../utils/enums/user
 
 import { signupSchema } from "./auth.validation.js"
 import TokenModel from "../../DB/models/token.model.js"
+import { revokeTokenKey, set } from "../../DB/redis.repository.js"
 
 
 
@@ -157,7 +158,7 @@ export const loginWithGoogle = async (req,res) =>{
   });
 
 }
-
+// logout with ttl with mongoDB
 export const logout = async (req,res) =>{
 
     const {flag} = req.body
@@ -180,6 +181,32 @@ export const logout = async (req,res) =>{
             status = 200
     }
 
+    return successResponse({
+        res, message:"Logout Successfully",
+        statusCode: status
+    })
+
+}
+
+
+export const logoutWithRedis = async (req,res) =>{
+
+    const {flag} = req.body
+    // flag ==> // signoutFromAll ,  onlyOneDevice
+
+    let status = 200
+    switch (flag){
+        case LogoutTypeEnum.logout:
+            await set({
+                key:revokeTokenKey({userId:req.user._id, jti:req.decoded.jti}),
+                 value:req.decoded.jti, 
+                 ttl:req.decoded.exp + ACCESS_EXPIRES})
+            
+            
+        case LogoutTypeEnum.logoutFromAll:
+
+
+}
     return successResponse({
         res, message:"Logout Successfully",
         statusCode: status

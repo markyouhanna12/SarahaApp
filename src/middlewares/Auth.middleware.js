@@ -1,6 +1,7 @@
 import { findById, findOne } from "../DB/database.repository.js";
 import TokenModel from "../DB/models/token.model.js";
 import User from "../DB/models/user.model.js";
+import { get, revokeTokenKey } from "../DB/redis.repository.js";
 import { SignatureEnum, TokenTypeEnum } from "../utils/enums/user.enum.js";
 import { BadRequestException, ForbiddenException, NotFoundException , unauthorizedException } from "../utils/response/error.response.js";
 import { getSignature, verifyToken } from "../utils/tokens/token.js";
@@ -24,8 +25,17 @@ export const decodedToken = async ({authorization , tokenType = TokenTypeEnum.Ac
         : signature.refreshSignature})
     
     // check if the token is rovked or not --> check the logout from current device
-    if(await findOne({model:TokenModel, filter:{jti:decoded.jti}})){
-        throw unauthorizedException({message:"Token is revoked"})
+    // if(await findOne({model:TokenModel, filter:{jti:decoded.jti}})){
+    //     throw unauthorizedException({message:"Token is revoked"})
+    // }
+
+    // check revoked token with Redis
+    const isRevoked = await get({
+        key: revokeTokenKey({userId: decoded.id , jti : decoded.jti})
+    })
+
+    if(isRevoked){
+       throw unauthorizedException({message:"Token is revoked"}) 
     }
 
     const user = await findById({model:User, id:decoded.id})

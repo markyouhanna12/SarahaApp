@@ -18,4 +18,9 @@ router.post("/logout",
     authentication({tokenType:TokenTypeEnum.Access})
     ,authService.logout)
 
+
+router.post("/logout-with-Redis",
+    authentication({tokenType:TokenTypeEnum.Access})
+    ,authService.logoutWithRedis)
+
 export default router

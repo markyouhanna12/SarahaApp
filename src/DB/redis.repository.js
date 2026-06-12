@@ -1,5 +1,13 @@
 import { redisClient } from "./redis.connection.js";
 
+export const revokeTokenKeyPrefix = ({userId}) =>{
+    return `user:revokedTokens:${userId}`
+}
+export const revokeTokenKey = ({userId , jti}) =>{
+    return `${revokeTokenKeyPrefix({userId})}:${jti}` //--> user:revokedTokens:userId:jti
+}
+
+
 export const set = async ({key, value , ttl = null}) =>{
     try {
         const data = typeof value != "string" ? JSON.stringify(value) :value
@@ -21,10 +29,9 @@ export const set = async ({key, value , ttl = null}) =>{
 }
 
 // get value from redis
-export const get = async (key) =>{
+export const get = async ({key}) =>{
     try {
-        const data = await redisClient.get(key)
-        return JSON.parse(data)
+        return await redisClient.get(key)
         
     } catch (error) {
         console.log("Redis Get Error",error);
