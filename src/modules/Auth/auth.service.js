@@ -22,6 +22,7 @@ import TokenModel from "../../DB/models/token.model.js"
 import { revokeAllTokenKey, revokeTokenKey, set } from "../../DB/redis.repository.js"
 import { generateOTP } from "../../utils/generateOTP.js"
 import { emailSubject, sendEmail } from "../../utils/email/email.utils.js"
+import { emailEvent } from "../../utils/events/email.events.js"
 
 
 export const signup = async (req, res) => {
@@ -54,7 +55,11 @@ export const signup = async (req, res) => {
             phone:encryptedData ,
             cofirmEmailOTP :hashedOtp }]})
 
-    await sendEmail({to:email , subject:emailSubject.confirmEmial , text : otp})
+    // await sendEmail({to:email , subject:emailSubject.confirmEmial , text : otp})
+    // we need to make the sendEmail as call event to reduce the time of signup service (2.55 s -> 244 ms)
+
+    emailEvent.emit("confirmEmail", {to:email , otp , firstName})
+
 
     return successResponse({res,statusCode:201,message:"User Created successfully",data:{newUser}})
 
