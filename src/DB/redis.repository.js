@@ -7,6 +7,10 @@ export const revokeTokenKey = ({userId , jti}) =>{
     return `${revokeTokenKeyPrefix({userId})}:${jti}` //--> user:revokedTokens:userId:jti
 }
 
+export const revokeAllTokenKey = ({userId}) => {
+    return `revokeAll:${userId}`;
+}
+
 
 export const set = async ({key, value , ttl = null}) =>{
     try {

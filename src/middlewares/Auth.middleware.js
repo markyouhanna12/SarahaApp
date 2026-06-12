@@ -1,7 +1,7 @@
 import { findById, findOne } from "../DB/database.repository.js";
 import TokenModel from "../DB/models/token.model.js";
 import User from "../DB/models/user.model.js";
-import { get, revokeTokenKey } from "../DB/redis.repository.js";
+import { get, revokeTokenKey , revokeAllTokenKey } from "../DB/redis.repository.js";
 import { SignatureEnum, TokenTypeEnum } from "../utils/enums/user.enum.js";
 import { BadRequestException, ForbiddenException, NotFoundException , unauthorizedException } from "../utils/response/error.response.js";
 import { getSignature, verifyToken } from "../utils/tokens/token.js";
@@ -29,7 +29,7 @@ export const decodedToken = async ({authorization , tokenType = TokenTypeEnum.Ac
     //     throw unauthorizedException({message:"Token is revoked"})
     // }
 
-    // check revoked token with Redis
+    // check revoked token with Redis --> single logout
     const isRevoked = await get({
         key: revokeTokenKey({userId: decoded.id , jti : decoded.jti})
     })
@@ -43,11 +43,19 @@ export const decodedToken = async ({authorization , tokenType = TokenTypeEnum.Ac
     if(!user){
         throw NotFoundException({message:"Not Registered Account"})
     }
-
+    // check if the token is expired or not --> check the change credentials time --> for logout from all devices option with MongoDB
     if(user.changeCredentialsTime?.getTime() > decoded.iat * 1000){
         throw unauthorizedException({message:"Token is expired"})
     }
+
+    // check if the token is expired or not --> check the change credentials time --> for logout from all devices option with Redis
+     const logoutAllTime = await get({
+        key: revokeAllTokenKey({userId: decoded.id})
+     })   
         
+    if(logoutAllTime && logoutAllTime > decoded.iat){
+        throw unauthorizedException({message:"Token is expired"})
+    }
 
 
     return {user , decoded}

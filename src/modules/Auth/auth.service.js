@@ -19,7 +19,7 @@ import { GenderEnum, LogoutTypeEnum, ProviderEnum } from "../../utils/enums/user
 
 import { signupSchema } from "./auth.validation.js"
 import TokenModel from "../../DB/models/token.model.js"
-import { revokeTokenKey, set } from "../../DB/redis.repository.js"
+import { revokeAllTokenKey, revokeTokenKey, set } from "../../DB/redis.repository.js"
 
 
 
@@ -176,9 +176,14 @@ export const logout = async (req,res) =>{
                 }
             ]})
             status = 201;
+            break;
         case LogoutTypeEnum.logoutFromAll:
-            await findByIdAndUpdate({model:User, id:{_id:req.user._id}, update:{changeCredentialsTime:Date.now()}})
+            await findByIdAndUpdate({
+                model:User, 
+                id:{_id:req.user._id}, 
+                update:{changeCredentialsTime:Date.now()}})
             status = 200
+            break;
     }
 
     return successResponse({
@@ -200,12 +205,21 @@ export const logoutWithRedis = async (req,res) =>{
             await set({
                 key:revokeTokenKey({userId:req.user._id, jti:req.decoded.jti}),
                  value:req.decoded.jti, 
-                 ttl:req.decoded.exp + ACCESS_EXPIRES})
-            
+                 ttl:req.decoded.exp - Math.floor(Date.now()/1000)
+            })
+            status = 201;
+            break;
             
         case LogoutTypeEnum.logoutFromAll:
-
-
+            await set({
+                key:revokeAllTokenKey({
+                    userId:req.user._id
+                }),
+                value: Math.floor(Date.now()/1000),
+            })
+            status = 200
+            break
+            
 }
     return successResponse({
         res, message:"Logout Successfully",
