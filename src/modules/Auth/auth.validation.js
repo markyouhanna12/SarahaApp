@@ -58,3 +58,18 @@ export const sendOtpSchema = {
 })
 
 }
+
+export const resetPasswordSchema = {
+    body: joi.object({
+
+    email : generalFields.email.required(),
+
+    otp : generalFields.otp.required(),
+
+    newPassword : generalFields.password.required(),
+
+    confirmPassword : generalFields.confirmPassword
+
+})
+
+}

@@ -8,7 +8,20 @@ export const emailEvent = new EventEmitter()
 emailEvent.on("confirmEmail" , async (data) => {
         await sendEmail(
             {to:data.to ,
-                 subject:emailSubject.confirmEmial ,
+                 subject:emailSubject.confirmEmail ,
+                  html:template(data.firstName , data.otp)})
+        .catch((error) =>{
+            console.log("Error Sending confirm Email", error);
+            
+        })
+
+})
+
+
+emailEvent.on("forgetPassword" , async (data) => {
+        await sendEmail(
+            {to:data.to ,
+                 subject:emailSubject.resetPassword ,
                   html:template(data.firstName , data.otp)})
         .catch((error) =>{
             console.log("Error Sending confirm Email", error);

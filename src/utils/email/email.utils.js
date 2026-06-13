@@ -37,7 +37,7 @@ export const sendEmail = async({
 }
 
 export const emailSubject = {
-    confirmEmial: "Confirm Your Email",
+    confirmEmail: "Confirm Your Email",
     resetPassword : "Reset your Password",
     welcome: "Welcome to SarahaApp",
     contactUs: "Contact Us"

@@ -55,6 +55,9 @@ const userSchema = new mongoose.Schema({
     cofirmEmailOTP:{
         type:String
     },
+    forgetPasswordOTP:{
+        type:String
+    },
     profilePic:{
         type:String
     },
@@ -68,9 +71,7 @@ const userSchema = new mongoose.Schema({
     },
     changeCredentialsTime:{
         type:Date
-    }
-
-
+    },
 },
 {
     timestamps:true,

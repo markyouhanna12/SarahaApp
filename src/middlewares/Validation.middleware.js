@@ -66,6 +66,9 @@ export const generalFields = {
             "string.max":"Password must be at most 25 characters",
             "string.pattern.base":"Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
         }),
+
+        
+        confirmPassword: joi.ref("password"),
     
         phone : joi
         .string()

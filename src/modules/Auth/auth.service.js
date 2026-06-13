@@ -1,5 +1,5 @@
 import User from "../../DB/models/user.model.js"
-import {create, findOne, findById, updateOne, findByIdAndUpdate} from "../../DB/database.repository.js"
+import {create, findOne, findById, updateOne, findByIdAndUpdate, findOneAndUpdate} from "../../DB/database.repository.js"
 import {BadRequestException, ConflictException, NotFoundException, TooManyRequestsException} from "../../utils/response/error.response.js"
 import {successResponse} from "../../utils/response/success.resonse.js"
 import {genrateHash,compareHash} from "../../utils/security/hash.security.js"
@@ -342,4 +342,89 @@ export const resendOTP = async (req,res) =>{
     return successResponse({
         res, message:"OTP sent successfully"
     })
+}
+
+export const forgetPassword = async (req,res) =>{
+    const {email} = req.body
+
+    const otp = generateOTP()
+    const hashedOtp = await genrateHash({plaintext:otp, algorithm:HashEnum.Argon})
+
+    const user = await findOneAndUpdate({
+        model:User,
+        filter:{
+            email,
+            provider:ProviderEnum.System,
+            confirmEmail: {$exists: true}
+
+        },
+        update:{forgetPasswordOTP:hashedOtp}
+    })
+    
+    if(!user){
+        throw NotFoundException({message:"User not found or already confirmed"})
+    }
+
+    emailEvent.emit("forgetPassword", {to:email , otp , firstName:user.firstName})
+
+    return successResponse({
+        res, message:"OTP sent successfully"
+    })
+
+}
+
+export const resetPassword = async (req,res) =>{
+
+    const {email , otp , newPassword } = req.body
+
+    const user = await findOne({
+        model:User,
+        filter:{
+            email,
+            provider:ProviderEnum.System,
+            confirmEmail: {$exists: true},
+            forgetPasswordOTP: {$exists: true}
+        }
+    })
+
+    if(!user){
+        throw NotFoundException({message:"User Not found"})
+    }
+
+    const isOtpValid = await compareHash({
+        plaintext:otp,
+        ciphertext:user.forgetPasswordOTP,
+        algorithm:HashEnum.Argon
+    })
+
+    if(!isOtpValid){
+        throw BadRequestException({message:"Invalid OTP"})
+    }
+
+    // hashing the new password
+    const hashedPassword = await genrateHash({
+        plaintext:newPassword,
+        algorithm:HashEnum.Argon
+    })
+    
+    // update
+    await updateOne({
+        model:User,
+        filter:{email},
+        update:{
+            password: hashedPassword,
+            $unset :{forgetPasswordOTP :true},
+        }
+
+    })
+
+    return successResponse({
+        res,
+        statusCode:200,
+        message:"Password Reset Successfully"
+    })
+
+
+
+
 }
