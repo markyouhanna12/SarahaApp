@@ -1,6 +1,7 @@
 import { GenderEnum, ProviderEnum, RoleEnum } from "../utils/enums/user.enum.js";
 import { BadRequestException } from "../utils/response/error.response.js";
 import joi from "joi"
+import { Types } from "mongoose"
 
 export const generalFields = {
     firstName : joi
@@ -76,7 +77,7 @@ export const generalFields = {
 
         id: joi.string().custom((value, helpers) =>{
 
-            return ( Types.ObjectId.isValid(value) || helpers.message("Invalid ObjectId format") )
+            return Types.ObjectId.isValid(value) ? value : helpers.message("Invalid ObjectId format")
         }),
 
         gender: joi.string().valid(... Object.values(GenderEnum)),

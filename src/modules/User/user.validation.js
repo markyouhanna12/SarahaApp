@@ -39,3 +39,9 @@ export const coverImagesSchema = {
     .required()
 
 }
+
+export const freezeAccountSchema = {
+    params: joi.object({
+        userId : generalFields.id
+    })
+}

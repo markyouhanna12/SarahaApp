@@ -4,14 +4,14 @@ import { authentication, authorization } from "../../middlewares/Auth.middleware
 import { RoleEnum, TokenTypeEnum } from "../../utils/enums/user.enum.js";
 import { fileValidation, localFileUpload } from "../../utils/multer/local.multer.js";
 import { validation } from "../../middlewares/Validation.middleware.js";
-import { coverImagesSchema, ProfilePicSchema } from "./user.validation.js";
+import * as userValidation from "./user.validation.js";
 
 const router = express.Router()
 
 
 router.get("/",
     authentication({tokenType:TokenTypeEnum.Access}),
-    authorization({accessRoles:[RoleEnum.User]}),
+    authorization({accessRoles:[RoleEnum.User , RoleEnum.Admin]}),
     userService.getProfile)
 
     
@@ -19,7 +19,7 @@ router.patch("/update-profile-pic",
     authentication({tokenType:TokenTypeEnum.Access}),
     authorization({accessRoles:[RoleEnum.User]}),
     localFileUpload({customPath:"User" , validation:[...fileValidation.images]}).single("attachments"),
-    validation(ProfilePicSchema),
+    validation(userValidation.ProfilePicSchema),
     userService.updateProfilePic)
 
 
@@ -27,9 +27,19 @@ router.patch("/update-profile-Cover",
     authentication({tokenType:TokenTypeEnum.Access}),
     authorization({accessRoles:[RoleEnum.User]}),
     localFileUpload({customPath:"User" , validation:[...fileValidation.images]}).array("attachments",5),
-    validation(coverImagesSchema),
+    validation(userValidation.coverImagesSchema),
     userService.updateCoverPic)
   
+// freeze by user or admin
+
+
+router.delete("{/:userId}/freeze-account",
+    authentication({tokenType: TokenTypeEnum.Access}),
+    authorization({accessRoles: [RoleEnum.User , RoleEnum.Admin]}),
+    validation(userValidation.freezeAccountSchema),
+    userService.freezeAccount
+)
+
 
 
 export default router

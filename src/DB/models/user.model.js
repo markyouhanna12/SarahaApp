@@ -72,6 +72,18 @@ const userSchema = new mongoose.Schema({
     changeCredentialsTime:{
         type:Date
     },
+    freezedBy:{
+        type: mongoose.Schema.Types.ObjectId, ref: "User"
+    },
+    freezedAt :{
+        type:Date
+    },
+    restoredBy :{
+        type: mongoose.Schema.Types.ObjectId, ref: "User"
+    },
+    restoredAt :{
+        type: Date
+    }
 },
 {
     timestamps:true,

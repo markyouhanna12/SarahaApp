@@ -113,7 +113,7 @@ export const login = async (req, res) => {
     const {email ,password} = req.body
     const user = await findOne({
         model:User, 
-        filter:{email , confirmEmail:{$exists : true}}})
+        filter:{email }})
 
     if(!user){
         throw NotFoundException({message:"Invalid email or password"})
@@ -125,8 +125,16 @@ export const login = async (req, res) => {
     if(!isPasswordValid){
         throw BadRequestException({message:"Invalid email or password"})
     }
+    const confrimedAccount = await findOne({
+        model: User, 
+        filter:{email , confirmEmail:{$exists : true}}
+    })
 
-    const credentials = await getNewLoginCredentials(user)
+    if(!confrimedAccount){
+        throw BadRequestException({message:"Email not confirmed, please check your email"})
+    }
+
+    const credentials = await getNewLoginCredentials(confrimedAccount)
 
     return successResponse({res,statusCode:200,message:"Login successfully",data:credentials})
 }
