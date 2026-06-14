@@ -19,6 +19,14 @@ export const otpAttemptsKey = ({email}) => {
     return `otpAttempts:${email}`;
 }
 
+export const recoverAccountKey = ({email}) => {
+    return `recoverAccount:${email}`;
+}
+
+export const recoverAccountAttemptsKey = ({email}) => {
+    return `recoverAccountAttempts:${email}`;
+}
+
 // increment a numeric key (returns the value after incrementing)
 export const incr = async ({key}) =>{
     try {

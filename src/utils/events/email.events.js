@@ -29,3 +29,17 @@ emailEvent.on("forgetPassword" , async (data) => {
         })
 
 })
+
+
+
+emailEvent.on("recoverAccount" , async (data) => {
+        await sendEmail(
+            {to:data.to ,
+                 subject:emailSubject.recoverAccount ,
+                  html:template(data.firstName , data.otp)})
+        .catch((error) =>{
+            console.log("Error while sending recover account email", error);
+            
+        })
+
+})

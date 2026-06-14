@@ -51,3 +51,16 @@ export const restoreAccountSchema = {
         userId : generalFields.id
     })
 }
+
+export const recoverAccountSchema = {
+    body: joi.object({
+        email : generalFields.email.required()
+    })
+}
+
+export const confirmRecoverAccountSchema = {
+    body: joi.object({
+        email : generalFields.email.required(),
+        otp : generalFields.otp.required()
+    })
+}

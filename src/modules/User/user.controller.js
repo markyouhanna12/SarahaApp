@@ -47,6 +47,17 @@ router.patch("/:userId/restore-account",
     userService.restoreAccount
 )
 
+// self-service account recovery (public, OTP based)
+router.post("/recover-account",
+    validation(userValidation.recoverAccountSchema),
+    userService.sendRecoverAccountOTP
+)
+
+router.patch("/recover-account/verify",
+    validation(userValidation.confirmRecoverAccountSchema),
+    userService.confirmRecoverAccount
+)
+
 
 
 export default router

@@ -40,6 +40,7 @@ export const emailSubject = {
     confirmEmail: "Confirm Your Email",
     resetPassword : "Reset your Password",
     welcome: "Welcome to SarahaApp",
-    contactUs: "Contact Us"
+    contactUs: "Contact Us",
+    recoverAccount: "Recover Your Account"
 
 }
