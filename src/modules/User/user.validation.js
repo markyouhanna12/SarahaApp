@@ -45,3 +45,9 @@ export const freezeAccountSchema = {
         userId : generalFields.id
     })
 }
+
+export const restoreAccountSchema = {
+    params: joi.object({
+        userId : generalFields.id
+    })
+}

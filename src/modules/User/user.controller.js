@@ -39,6 +39,13 @@ router.delete("{/:userId}/freeze-account",
     validation(userValidation.freezeAccountSchema),
     userService.freezeAccount
 )
+// restore user by admin
+router.patch("/:userId/restore-account",
+    authentication({tokenType: TokenTypeEnum.Access}),
+    authorization({accessRoles: [RoleEnum.Admin]}),
+    validation(userValidation.restoreAccountSchema),
+    userService.restoreAccount
+)
 
 
 
