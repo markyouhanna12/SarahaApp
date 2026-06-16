@@ -226,12 +226,18 @@ export const hardDeleteAccount = async (req,res) =>{
         model:User,
         filter:{_id : userId , freezedAt:{$exists : true}}
     })
-
-    return successResponse({
+    
+    if(deletedAccount.deletedCount){
+        return successResponse({
         res,
         message:"The account has been Deleted",
         statusCode:200,
         data :{deletedAccount}
     })
+
+    }else {
+        throw NotFoundException({message:"User Not Found"})
+    }
+
 
 }
