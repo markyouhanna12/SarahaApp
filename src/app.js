@@ -6,6 +6,7 @@ import { globalErrorHandler, NotFoundException } from "./utils/response/error.re
 import connectDB from "./DB/connection.js"
 import cors from "cors"
 import { connectRedis } from "./DB/redis.connection.js"
+import messageRouter from "./modules/message/message.controller.js"
 
 const app = express()
 
@@ -16,6 +17,7 @@ await connectRedis()
 app.use("/uploads",express.static("./src/uploads"))
 app.use("/auth",authRouter)
 app.use("/user",userRouter)
+app.use("/message",messageRouter)
 
 app.all("/*dummy",(req,res)=>{
     throw NotFoundException({message:"Not found Handler!!"})
