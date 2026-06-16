@@ -31,8 +31,6 @@ router.patch("/update-profile-Cover",
     userService.updateCoverPic)
   
 // freeze by user or admin
-
-
 router.delete("{/:userId}/freeze-account",
     authentication({tokenType: TokenTypeEnum.Access}),
     authorization({accessRoles: [RoleEnum.User , RoleEnum.Admin]}),
@@ -58,6 +56,14 @@ router.patch("/recover-account/verify",
     userService.confirmRecoverAccount
 )
 
+
+// hard delete user by admin only
+router.delete("/:userId/hard-delete",
+    authentication({tokenType: TokenTypeEnum.Access}),
+    authorization({accessRoles: [RoleEnum.Admin]}),
+    validation(userValidation.hardDeleteAccountSchema),
+    userService.hardDeleteAccount
+)
 
 
 export default router

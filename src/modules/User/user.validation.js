@@ -64,3 +64,10 @@ export const confirmRecoverAccountSchema = {
         otp : generalFields.otp.required()
     })
 }
+
+
+export const hardDeleteAccountSchema = {
+    params: joi.object({
+        userId : generalFields.id
+    })
+}

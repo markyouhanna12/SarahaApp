@@ -1,4 +1,4 @@
-import { findByIdAndUpdate, findOne, findOneAndUpdate } from "../../DB/database.repository.js"
+import { deleteOne, findByIdAndUpdate, findOne, findOneAndUpdate } from "../../DB/database.repository.js"
 import User from "../../DB/models/user.model.js"
 import { RoleEnum } from "../../utils/enums/user.enum.js"
 import { HashEnum } from "../../utils/enums/security.enum.js"
@@ -216,4 +216,22 @@ export const confirmRecoverAccount = async (req,res) =>{
         statusCode:200,
         data :{updatedUser}
     })
+}
+
+
+export const hardDeleteAccount = async (req,res) =>{
+    const {userId} = req.params // _id of freezed user
+
+    const deletedAccount = await deleteOne({
+        model:User,
+        filter:{_id : userId , freezedAt:{$exists : true}}
+    })
+
+    return successResponse({
+        res,
+        message:"The account has been Deleted",
+        statusCode:200,
+        data :{deletedAccount}
+    })
+
 }
