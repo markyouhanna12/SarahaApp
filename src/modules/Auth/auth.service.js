@@ -134,6 +134,15 @@ export const login = async (req, res) => {
         throw BadRequestException({message:"Email not confirmed, please check your email"})
     }
 
+    const freezedAccount = await findOne({
+        model: User, 
+        filter:{email , freezedAt:{$exists : true}}
+    })
+
+    if(freezedAccount){
+        throw BadRequestException({message:"The account has been freezed"})
+    }
+
     const credentials = await getNewLoginCredentials(confrimedAccount)
 
     return successResponse({res,statusCode:200,message:"Login successfully",data:credentials})
