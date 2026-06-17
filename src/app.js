@@ -10,6 +10,7 @@ import { corsOptions } from "./utils/cors/cors.utils.js"
 import helmet from "helmet"
 import morgan from "morgan"
 import { attachRouterWithLogger } from "./logger/morgan.logger.js"
+import chalk from "chalk"
 
 const app = express()
 
@@ -31,7 +32,7 @@ app.use("/message",messageRouter)
 
 
 app.all("/*dummy",(req,res)=>{
-    throw NotFoundException({message:"Not found Handler!!"})
+    throw chalk.red(NotFoundException({message:"Not found Handler!!"}))
 })
 
 app.use(globalErrorHandler)

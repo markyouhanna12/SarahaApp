@@ -1,6 +1,6 @@
 import { createClient } from "redis";
 import { RedisUrl } from "../../config/config.service.js"
-
+import chalk from "chalk";
 export const redisClient = createClient({
     url:RedisUrl
 })
@@ -8,12 +8,12 @@ export const redisClient = createClient({
 export const connectRedis = async ()=>{
     try {
         await redisClient.connect()
-        console.log("Connected to Redis successfully");
+        console.log(chalk.bold.green("Connected to Redis successfully"));
 
         
     } catch (error) {
 
-        console.error("Error connecting to Redis:",error);
+        console.error(chalk.red("Error connecting to Redis:"),error);
         
         
     }

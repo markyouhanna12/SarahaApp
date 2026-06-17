@@ -26,7 +26,7 @@ export const sendMessage = async (req,res) =>{
             content
         }]
     })
-    console.log(message);
+    
     if(!message){
         throw NotFoundException({message:"Message not sent"})
     }
