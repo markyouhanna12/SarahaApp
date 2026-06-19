@@ -8,27 +8,29 @@ import cors from "cors"
 import { connectRedis } from "./DB/redis.connection.js"
 import { corsOptions } from "./utils/cors/cors.utils.js"
 import helmet from "helmet"
-import morgan from "morgan"
 import { attachRouterWithLogger } from "./logger/morgan.logger.js"
 import chalk from "chalk"
+import { rateLimit } from "express-rate-limit"
+import { customRateLimiter } from "./middlewares/rateLimitter.middleware.js"
 
 const app = express()
 
 app.use(express.json())
 app.use(cors(corsOptions()))
 app.use(helmet())
+
+app.use(customRateLimiter)
+
 attachRouterWithLogger(app , "/auth" ,authRouter , "auth.log" )
 attachRouterWithLogger(app , "/user" ,userRouter , "user.log" )
 attachRouterWithLogger(app , "/message" ,messageRouter , "message.log" )
 
-
 await connectDB()
 await connectRedis()
 
+
+
 app.use("/uploads",express.static("./src/uploads"))
-app.use("/auth",authRouter)
-app.use("/user",userRouter)
-app.use("/message",messageRouter)
 
 
 app.all("/*dummy",(req,res)=>{
